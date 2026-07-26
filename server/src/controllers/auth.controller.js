@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import generateToken from '../utils/generateToken.js';
 
 class AppError extends Error {
 	constructor(message, statusCode = 500) {
@@ -17,20 +17,6 @@ const buildUserResponse = (user) => ({
 	createdAt: user.createdAt,
 	updatedAt: user.updatedAt,
 });
-
-const signAccessToken = (payload) => {
-	const secret = process.env.ACCESS_TOKEN_SECRET || 'access-secret';
-	const expiresIn = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
-
-	return jwt.sign(payload, secret, { expiresIn });
-};
-
-const signRefreshToken = (payload) => {
-	const secret = process.env.REFRESH_TOKEN_SECRET || 'refresh-secret';
-	const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
-
-	return jwt.sign(payload, secret, { expiresIn });
-};
 
 const setRefreshTokenCookie = (res, refreshToken) => {
 	const isProd = process.env.NODE_ENV === 'production';
@@ -80,8 +66,16 @@ export const registerUser = async (req, res, next) => {
 			email: user.email,
 		};
 
-		const accessToken = signAccessToken(tokenPayload);
-		const refreshToken = signRefreshToken(tokenPayload);
+		const accessToken = generateToken(
+			tokenPayload,
+			process.env.ACCESS_TOKEN_SECRET || 'access-secret',
+			process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
+		);
+		const refreshToken = generateToken(
+			tokenPayload,
+			process.env.REFRESH_TOKEN_SECRET || 'refresh-secret',
+			process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
+		);
 
 		setRefreshTokenCookie(res, refreshToken);
 
@@ -117,8 +111,16 @@ export const loginUser = async (req, res, next) => {
 			email: user.email,
 		};
 
-		const accessToken = signAccessToken(tokenPayload);
-		const refreshToken = signRefreshToken(tokenPayload);
+		const accessToken = generateToken(
+			tokenPayload,
+			process.env.ACCESS_TOKEN_SECRET || 'access-secret',
+			process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
+		);
+		const refreshToken = generateToken(
+			tokenPayload,
+			process.env.REFRESH_TOKEN_SECRET || 'refresh-secret',
+			process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
+		);
 
 		setRefreshTokenCookie(res, refreshToken);
 
