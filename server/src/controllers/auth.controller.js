@@ -41,6 +41,9 @@ const clearRefreshTokenCookie = (res) => {
 	});
 };
 
+const getAccessTokenSecret = () => process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET || 'access-secret';
+const getRefreshTokenSecret = () => process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET || 'refresh-secret';
+
 export const registerUser = async (req, res, next) => {
 	try {
 		const { name, email, password } = req.body;
@@ -68,12 +71,12 @@ export const registerUser = async (req, res, next) => {
 
 		const accessToken = generateToken(
 			tokenPayload,
-			process.env.ACCESS_TOKEN_SECRET || 'access-secret',
+			getAccessTokenSecret(),
 			process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 		);
 		const refreshToken = generateToken(
 			tokenPayload,
-			process.env.REFRESH_TOKEN_SECRET || 'refresh-secret',
+			getRefreshTokenSecret(),
 			process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 		);
 
@@ -113,12 +116,12 @@ export const loginUser = async (req, res, next) => {
 
 		const accessToken = generateToken(
 			tokenPayload,
-			process.env.ACCESS_TOKEN_SECRET || 'access-secret',
+			getAccessTokenSecret(),
 			process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 		);
 		const refreshToken = generateToken(
 			tokenPayload,
-			process.env.REFRESH_TOKEN_SECRET || 'refresh-secret',
+			getRefreshTokenSecret(),
 			process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 		);
 
@@ -139,6 +142,20 @@ export const logoutUser = async (req, res, next) => {
 
 		res.status(200).json({
 			message: 'Logged out successfully',
+		});
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const me = async (req, res, next) => {
+	try {
+		const user = await User.findById(req.user.id);
+		if (!user) {
+			throw new AppError('User not found', 404);
+		}
+		res.status(200).json({
+			user: buildUserResponse(user),
 		});
 	} catch (error) {
 		next(error);
