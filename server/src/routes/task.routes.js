@@ -6,9 +6,9 @@ import { createTaskSchema, updateTaskSchema } from '../validations/task.validati
 
 const router = Router();
 
-router.get('/', getTasks);
+router.get('/', protect, getTasks);
 router.post('/', protect, validate(createTaskSchema), createTask);
 router.put('/:id', protect, validate(updateTaskSchema), updateTask);
-router.delete('/:id', deleteTask);
+router.delete('/:id', protect, deleteTask);
 
 export default router;

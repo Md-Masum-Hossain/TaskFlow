@@ -2,15 +2,25 @@ import Task from '../models/task.model.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
 export const getTasks = asyncHandler(async (req, res) => {
-  const tasks = await Task.find();
-  if (!tasks) {
-    return res.status(404).json({ message: 'No tasks found' });
+  const {search, status, priority} = req.query;
+  const query = { user: req.user.id };
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { description: { $regex: search, $options: 'i' } },
+    ];  
   }
+  if (status) {
+    query.status = status;
+  }
+  if (priority) {
+    query.priority = priority;
+  }
+  const tasks = await Task.find(query).sort({ createdAt: -1 });
   res.json(tasks);
 });
 
 export const createTask = asyncHandler(async (req, res) => {
-  console.log("Creating task for user:", req.user);
   const task = await new Task({
     ...req.body,
     user : req.user.id,
@@ -20,7 +30,10 @@ export const createTask = asyncHandler(async (req, res) => {
 });
 
 export const getTask = asyncHandler(async (req, res) => {
-  const task = await Task.findById(req.params.id);
+  const task = await Task.findById({
+    _id: req.params.id,
+    user: req.user.id
+  });
   if (!task) {
     return res.status(404).json({ message: 'Task not found' });
   }
@@ -28,7 +41,10 @@ export const getTask = asyncHandler(async (req, res) => {
 });
 
 export const updateTask = asyncHandler(async (req, res) => {
-  const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const task = await Task.findByIdAndUpdate({
+    _id: req.params.id,
+    user: req.user.id
+  }, req.body, { new: true });
   if (!task) {
     return res.status(404).json({ message: 'Task not found' });
   }
@@ -36,7 +52,10 @@ export const updateTask = asyncHandler(async (req, res) => {
 });
 
 export const deleteTask = asyncHandler(async (req, res) => {
-  const task = await Task.findByIdAndDelete(req.params.id);
+  const task = await Task.findByIdAndDelete({
+    _id: req.params.id,
+    user: req.user.id
+  });
   if (!task) {
     return res.status(404).json({ message: 'Task not found' });
   }
