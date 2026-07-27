@@ -46,10 +46,6 @@ const clearRefreshTokenCookie = (res) => {
 export const registerUser = asyncHandler(async (req, res, next) => {
 	const { name, email, password } = req.body;
 
-	if (!name || !email || !password) {
-		throw new AppError('Name, email, and password are required', 400);
-	}
-
 	const existingUser = await User.findOne({ email: email.toLowerCase() });
 	if (existingUser) {
 		throw new AppError('Email is already in use', 409);
@@ -88,10 +84,6 @@ export const registerUser = asyncHandler(async (req, res, next) => {
 
 export const loginUser = asyncHandler(async (req, res, next) => {
 	const { email, password } = req.body;
-
-	if (!email || !password) {
-		throw new AppError('Email and password are required', 400);
-	}
 
 	const user = await User.findOne({ email: email.toLowerCase() });
 	if (!user) {
