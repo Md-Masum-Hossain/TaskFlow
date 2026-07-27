@@ -20,6 +20,13 @@ const buildUserResponse = (user) => ({
 	updatedAt: user.updatedAt,
 });
 
+const jwtSecret = process.env.JWT_SECRET;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+
+if (!jwtSecret || !refreshTokenSecret) {
+	throw new Error('JWT_SECRET and REFRESH_TOKEN_SECRET are required');
+}
+
 const setRefreshTokenCookie = (res, refreshToken) => {
 	const isProd = process.env.NODE_ENV === 'production';
 
@@ -65,12 +72,12 @@ export const registerUser = asyncHandler(async (req, res, next) => {
 
 	const accessToken = generateToken(
 		tokenPayload,
-		process.env.JWT_SECRET || 'your_jwt_secret',
+		jwtSecret,
 		process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 	);
 	const refreshToken = generateToken(
 		tokenPayload,
-		process.env.REFRESH_TOKEN_SECRET || 'your_jwt_secret',
+		refreshTokenSecret,
 		process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 	);
 
@@ -102,12 +109,12 @@ export const loginUser = asyncHandler(async (req, res, next) => {
 
 	const accessToken = generateToken(
 		tokenPayload,
-		process.env.JWT_SECRET || 'your_jwt_secret',
+		jwtSecret,
 		process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 	);
 	const refreshToken = generateToken(
 		tokenPayload,
-		process.env.REFRESH_TOKEN_SECRET || 'your_jwt_secret',
+		refreshTokenSecret,
 		process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 	);
 
@@ -154,7 +161,7 @@ export const refreshToken = asyncHandler(async (req, res, next) => {
 
 	let decoded;
 	try {
-		decoded = jwt.verify(refreshTokenValue, process.env.REFRESH_TOKEN_SECRET || 'your_jwt_secret');
+		decoded = jwt.verify(refreshTokenValue, refreshTokenSecret);
 	} catch (error) {
 		return res.status(401).json({ message: 'Invalid or expired refresh token' });
 	}
@@ -166,7 +173,7 @@ export const refreshToken = asyncHandler(async (req, res, next) => {
 
 	const accessToken = generateToken(
 		{ id: user._id.toString(), email: user.email },
-		process.env.JWT_SECRET || 'your_jwt_secret',
+		jwtSecret,
 		process.env.ACCESS_TOKEN_EXPIRES_IN || '15m'
 	);
 

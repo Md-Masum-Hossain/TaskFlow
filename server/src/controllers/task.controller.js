@@ -30,7 +30,7 @@ export const createTask = asyncHandler(async (req, res) => {
 });
 
 export const getTask = asyncHandler(async (req, res) => {
-  const task = await Task.findById({
+  const task = await Task.findOne({
     _id: req.params.id,
     user: req.user.id
   });
@@ -41,7 +41,7 @@ export const getTask = asyncHandler(async (req, res) => {
 });
 
 export const updateTask = asyncHandler(async (req, res) => {
-  const task = await Task.findByIdAndUpdate({
+  const task = await Task.findOneAndUpdate({
     _id: req.params.id,
     user: req.user.id
   }, req.body, { new: true });
@@ -52,7 +52,7 @@ export const updateTask = asyncHandler(async (req, res) => {
 });
 
 export const deleteTask = asyncHandler(async (req, res) => {
-  const task = await Task.findByIdAndDelete({
+  const task = await Task.findOneAndDelete({
     _id: req.params.id,
     user: req.user.id
   });

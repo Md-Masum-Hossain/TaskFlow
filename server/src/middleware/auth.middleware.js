@@ -4,6 +4,10 @@ import User from '../models/user.model.js';
 
 
 export const protect =  asyncHandler(async (req, res, next) => {
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: 'JWT secret is not configured' });
+    }
+
   const authHeader = req.headers.authorization || '';
     const parts = authHeader.trim().split(/\s+/);
 
@@ -17,7 +21,7 @@ export const protect =  asyncHandler(async (req, res, next) => {
       return res.status(401).json({ message: 'Not authorized, no token' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     let lastError;
 
     if (!decoded) {
