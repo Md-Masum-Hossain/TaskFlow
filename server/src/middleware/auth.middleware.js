@@ -1,16 +1,10 @@
 import jwt from 'jsonwebtoken';
+import asyncHandler from '../utils/asyncHandler.js';
+import User from '../models/user.model.js';
 
-const getCandidateSecrets = () => [
-  process.env.ACCESS_TOKEN_SECRET,
-  process.env.JWT_SECRET,
-  process.env.REFRESH_TOKEN_SECRET,
-  'access-secret',
-  'refresh-secret',
-].filter(Boolean);
 
-export const protect = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization || '';
+export const protect =  asyncHandler(async (req, res, next) => {
+  const authHeader = req.headers.authorization || '';
     const parts = authHeader.trim().split(/\s+/);
 
     if (parts.length !== 2 || !/^(Bearer|bearer)$/i.test(parts[0])) {
@@ -23,25 +17,17 @@ export const protect = (req, res, next) => {
       return res.status(401).json({ message: 'Not authorized, no token' });
     }
 
-    let decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret');
     let lastError;
-
-    for (const secret of getCandidateSecrets()) {
-      try {
-        decoded = jwt.verify(token, secret);
-        break;
-      } catch (error) {
-        lastError = error;
-      }
-    }
 
     if (!decoded) {
       throw lastError || new Error('Token verification failed');
     }
 
-    req.user = decoded;
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'Not authorized, user not found' });
+    }
+    req.user = user;
     next();
-  } catch (error) {
-    return res.status(401).json({ message: 'Not authorized, token failed' });
-  }
-};
+  });
