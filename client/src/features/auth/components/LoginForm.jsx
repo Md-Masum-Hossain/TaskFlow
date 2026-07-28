@@ -1,7 +1,39 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
+import {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLoginMutation } from '../api/authApi';
+import {toast} from 'sonner';
 
 function LoginForm() {
+
+  const navigate = useNavigate();
+  const [login, { isLoading, error }] = useLoginMutation();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await login(formData).unwrap();
+      toast.success('Login successful');
+      localStorage.setItem('accessToken', response.accessToken);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login failed:', err);
+      toast.error('Login failed: ' + (err.data?.message || 'Unknown error'));
+    }
+  };
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-white px-4 py-10 text-[#101828]">
       <section className="w-full max-w-[420px] rounded-[28px] border border-[#eaecf0] bg-white px-6 py-8 shadow-[0_1px_2px_rgba(16,24,40,0.06)] sm:px-8">
@@ -15,7 +47,7 @@ function LoginForm() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-[#344054]" htmlFor="login-email">
               Email
@@ -25,6 +57,9 @@ function LoginForm() {
               type="email"
               placeholder="Enter your email"
               className="h-11 w-full rounded-xl border border-[#d0d5dd] bg-white px-3 text-sm text-[#101828] outline-none placeholder:text-[#98a2b3] focus:border-[#2563eb]"
+              name="email"
+              value={formData.email}
+              onChange={handleChange} 
             />
           </div>
 
@@ -37,6 +72,9 @@ function LoginForm() {
               type="password"
               placeholder="Enter your password"
               className="h-11 w-full rounded-xl border border-[#d0d5dd] bg-white px-3 text-sm text-[#101828] outline-none placeholder:text-[#98a2b3] focus:border-[#2563eb]"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
             />
           </div>
 
@@ -51,11 +89,10 @@ function LoginForm() {
           </div>
 
           <button
+          disabled={isLoading}
             type="submit"
             className="h-11 w-full rounded-xl bg-[#2563eb] text-sm font-semibold text-white"
-          >
-            Sign in
-          </button>
+          >{isLoading ? 'Signing in...' : 'Sign in'}</button>
         </form>
 
         <p className="mt-6 text-center text-sm text-[#667085]">

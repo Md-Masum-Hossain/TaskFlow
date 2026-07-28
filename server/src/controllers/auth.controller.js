@@ -1,8 +1,11 @@
+import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import generateToken from '../utils/generateToken.js';
 import asyncHandler from '../utils/asyncHandler.js';
+
+dotenv.config();
 
 class AppError extends Error {
 	constructor(message, statusCode = 500) {
@@ -22,7 +25,6 @@ const buildUserResponse = (user) => ({
 
 const jwtSecret = process.env.JWT_SECRET;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-
 if (!jwtSecret || !refreshTokenSecret) {
 	throw new Error('JWT_SECRET and REFRESH_TOKEN_SECRET are required');
 }
@@ -106,7 +108,6 @@ export const loginUser = asyncHandler(async (req, res, next) => {
 		id: user._id.toString(),
 		email: user.email,
 	};
-
 	const accessToken = generateToken(
 		tokenPayload,
 		jwtSecret,
