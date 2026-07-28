@@ -1,3 +1,5 @@
+import React from 'react';
+import { useGetMeQuery } from '../features/auth/api/authApi';
 import TaskColumn from '../features/tasks/components/TaskColumn';
 
 const kanbanColumns = [
@@ -50,6 +52,13 @@ const kanbanColumns = [
 ];
 
 export default function DashboardPage() {
+  const { data: user, isLoading, error } = useGetMeQuery();
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
   return (
     <section className="space-y-5">
       <header className="flex items-center justify-between">
