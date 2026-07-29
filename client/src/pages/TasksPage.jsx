@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import TaskColumn from '../features/tasks/components/TaskColumn';
 import TaskModal from '../components/tasks/TaskModal';
+import DeleteConfirmationDialog from '../features/tasks/components/DeleteConfirmationDialog';
 import { useGetTasksQuery, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } from '../features/tasks/api/tasksApi';
 
 
@@ -45,7 +46,7 @@ export default function TasksPage() {
   const { data: tasksData, isLoading, isError } = useGetTasksQuery();
   const [createTask] = useCreateTaskMutation();
   const [updateTask] = useUpdateTaskMutation();
-  const [deleteTask] = useDeleteTaskMutation();
+  const [deleteTask, { isLoading: isDeleting }] = useDeleteTaskMutation();
 
   const kanbanColumns = [
     {
@@ -92,6 +93,10 @@ export default function TasksPage() {
     mode: 'create',
     initialValues: null,
   });
+  const [deleteState, setDeleteState] = useState({
+    open: false,
+    task: null,
+  });
 
   const openCreateModal = () => {
     setModalState({
@@ -109,8 +114,26 @@ export default function TasksPage() {
     });
   };
 
+  const openDeleteModal = (task) => {
+    setDeleteState({
+      open: true,
+      task,
+    });
+  };
+
   const closeModal = () => {
     setModalState((current) => ({ ...current, open: false }));
+  };
+
+  const closeDeleteModal = () => {
+    if (isDeleting) {
+      return;
+    }
+
+    setDeleteState({
+      open: false,
+      task: null,
+    });
   };
 
   const handleSubmitTask = async (taskData) => {
@@ -127,6 +150,19 @@ export default function TasksPage() {
       console.error('Error submitting task:', error);
     }
     closeModal();
+  };
+
+  const handleDeleteTask = async () => {
+    if (!deleteState.task || isDeleting) {
+      return;
+    }
+
+    try {
+      await deleteTask(deleteState.task._id).unwrap();
+      closeDeleteModal();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
   return (
@@ -236,6 +272,7 @@ export default function TasksPage() {
               count={column.count}
               tasks={column.tasks}
               onEditTask={openEditModal}
+              onDeleteTask={openDeleteModal}
             />
           ))}
         </div>
@@ -253,6 +290,13 @@ export default function TasksPage() {
         initialValues={modalState.initialValues || undefined}
         onClose={closeModal}
         onSubmit={handleSubmitTask}
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={deleteState.open}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteTask}
+        isPending={isDeleting}
       />
     </div>
   );

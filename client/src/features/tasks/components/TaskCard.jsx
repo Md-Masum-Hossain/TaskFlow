@@ -1,6 +1,7 @@
 import { FiCalendar } from 'react-icons/fi';
 
 import PriorityBadge from './PriorityBadge';
+import TaskActionsMenu from './TaskActionsMenu';
 import StatusBadge from './StatusBadge';
 
 function formatDueDate(value) {
@@ -20,7 +21,7 @@ function formatDueDate(value) {
   }).format(date);
 }
 
-export default function TaskCard({ title, description, priority, dueDate, assignee, status = 'todo', onEdit = () => {} }) {
+export default function TaskCard({ title, description, priority, dueDate, assignee, status = 'todo', onEdit, onDelete }) {
   return (
     <article className="rounded-[14px] bg-white p-5 shadow-[0_6px_18px_rgba(17,24,39,0.06)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(17,24,39,0.08)]">
       <div className="flex items-start justify-between gap-3">
@@ -28,14 +29,7 @@ export default function TaskCard({ title, description, priority, dueDate, assign
 
         <div className="flex items-center gap-2">
           <PriorityBadge priority={priority} />
-
-          <button
-            type="button"
-            onClick={onEdit}
-            className="inline-flex h-8 items-center justify-center rounded-full border border-[#d0d5dd] px-3 text-[13px] font-semibold text-[#344054] transition-colors duration-150 hover:bg-[#f9fafb]"
-          >
-            Edit
-          </button>
+          <TaskActionsMenu onEdit={onEdit} onDelete={onDelete} />
         </div>
       </div>
 
