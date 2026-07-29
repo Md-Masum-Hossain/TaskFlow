@@ -2,103 +2,11 @@ import { useState } from 'react';
 
 import TaskColumn from '../features/tasks/components/TaskColumn';
 import TaskModal from '../components/tasks/TaskModal';
+import { useGetTasksQuery, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } from '../features/tasks/api/tasksApi';
 
-const kanbanColumns = [
-  {
-    id: 'todo',
-    title: 'To Do',
-    count: 3,
-    tasks: [
-      {
-        id: 'todo-1',
-        title: 'Design task list filters',
-        description: 'Review the filter layout and align controls with the board header.',
-        priority: 'High',
-        status: 'todo',
-        dueDate: '2026-08-02',
-        assignee: 'Masum Hossain',
-      },
-      {
-        id: 'todo-2',
-        title: 'Prepare sprint task notes',
-        description: 'Collect review points and open items before the next planning session.',
-        priority: 'Medium',
-        status: 'todo',
-        dueDate: '2026-08-03',
-        assignee: 'Arafat Khan',
-      },
-      {
-        id: 'todo-3',
-        title: 'Update task priority copy',
-        description: 'Refine the visible labels used across the task cards and filters.',
-        priority: 'Low',
-        status: 'todo',
-        dueDate: '2026-08-05',
-        assignee: 'Sadia Rahman',
-      },
-    ],
-  },
-  {
-    id: 'progress',
-    title: 'In Progress',
-    count: 2,
-    tasks: [
-      {
-        id: 'progress-1',
-        title: 'Polish board/list toggle',
-        description: 'Keep the toggle visually aligned with the search and filter controls.',
-        priority: 'High',
-        status: 'in-progress',
-        dueDate: '2026-08-06',
-        assignee: 'Nusrat Jahan',
-      },
-      {
-        id: 'progress-2',
-        title: 'Refine task card spacing',
-        description: 'Tune the card internals so the board feels consistent across columns.',
-        priority: 'Medium',
-        status: 'in-progress',
-        dueDate: '2026-08-07',
-        assignee: 'Masum Hossain',
-      },
-    ],
-  },
-  {
-    id: 'done',
-    title: 'Completed',
-    count: 4,
-    tasks: [
-      {
-        id: 'done-1',
-        title: 'Finalize task board header',
-        description: 'Lock the header, filters, and add button presentation for handoff.',
-        priority: 'High',
-        status: 'completed',
-        dueDate: '2026-07-30',
-        assignee: 'Masum Hossain',
-      },
-    ],
-  },
-];
 
-const summarySections = [
-  {
-    title: 'Tasks by Status',
-    items: [
-      { label: 'To Do', value: '27', tone: 'bg-[#f2f4f7] text-[#344054]' },
-      { label: 'In Progress', value: '34', tone: 'bg-[#eff8ff] text-[#175cd3]' },
-      { label: 'Completed', value: '81', tone: 'bg-[#ecfdf3] text-[#067647]' },
-    ],
-  },
-  {
-    title: 'Tasks by Priority',
-    items: [
-      { label: 'High Priority', value: '19', tone: 'bg-[#fef3f2] text-[#b42318]' },
-      { label: 'Medium Priority', value: '53', tone: 'bg-[#fffaeb] text-[#b54708]' },
-      { label: 'Low Priority', value: '56', tone: 'bg-[#eff8ff] text-[#175cd3]' },
-    ],
-  },
-];
+
+
 
 function SectionCard({ children, className = '' }) {
   return (
@@ -133,6 +41,52 @@ function SummaryList({ title, items }) {
 }
 
 export default function TasksPage() {
+
+  const { data: tasksData, isLoading, isError } = useGetTasksQuery();
+  const [createTask] = useCreateTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
+  const [deleteTask] = useDeleteTaskMutation();
+
+  const kanbanColumns = [
+    {
+      id: 'todo',
+      title: 'To Do',
+      count: tasksData?.filter((task) => task.status === 'todo').length || 0,
+      tasks: tasksData?.filter((task) => task.status === 'todo') || [],
+    },
+    {
+      id: 'in-progress',
+      title: 'In Progress',
+      count: tasksData?.filter((task) => task.status === 'in-progress').length || 0,
+      tasks: tasksData?.filter((task) => task.status === 'in-progress') || [],
+    },
+    {
+      id: 'completed',
+      title: 'Completed',
+      count: tasksData?.filter((task) => task.status === 'completed').length || 0,
+      tasks: tasksData?.filter((task) => task.status === 'completed') || [],
+    },
+  ];
+
+  const summarySections = [
+    {
+      title: 'Task Summary',
+      items: [
+        { label: 'To Do', value: kanbanColumns[0].count, tone: 'bg-[#f2f4f7] text-[#344054]' },
+        { label: 'In Progress', value: kanbanColumns[1].count, tone: 'bg-[#eff8ff] text-[#175cd3]' },
+        { label: 'Completed', value: kanbanColumns[2].count, tone: 'bg-[#ecfdf3] text-[#067647]' },
+      ],
+    },
+    {
+      title: 'Tasks by Priority',
+      items: [
+        { label: 'High Priority', value: tasksData?.filter((task) => task.priority === 'high').length || 0, tone: 'bg-[#fef3f2] text-[#b42318]' },
+        { label: 'Medium Priority', value: tasksData?.filter((task) => task.priority === 'medium').length || 0, tone: 'bg-[#fffaeb] text-[#b54708]' },
+        { label: 'Low Priority', value: tasksData?.filter((task) => task.priority === 'low').length || 0, tone: 'bg-[#eff8ff] text-[#175cd3]' },
+      ],
+    },
+  ];
+
   const [modalState, setModalState] = useState({
     open: false,
     mode: 'create',
@@ -159,7 +113,19 @@ export default function TasksPage() {
     setModalState((current) => ({ ...current, open: false }));
   };
 
-  const handleSubmitTask = () => {
+  const handleSubmitTask = async (taskData) => {
+    try {
+      if (modalState.mode === 'create') {
+        await createTask(taskData).unwrap();
+      } else if (modalState.mode === 'edit') {
+          await updateTask({
+            id: taskData._id,
+            ...taskData,
+          }).unwrap();
+      }
+    } catch (error) {
+      console.error('Error submitting task:', error);
+    }
     closeModal();
   };
 
