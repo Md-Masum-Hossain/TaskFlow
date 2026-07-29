@@ -7,6 +7,7 @@ export default function Navbar({ onMenuClick }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const closeTimerRef = useRef(null);
   const [keyword, setKeyword] = useState('');
   const token = localStorage.getItem('accessToken');
 
@@ -37,10 +38,33 @@ export default function Navbar({ onMenuClick }) {
     return () => window.removeEventListener('pointerdown', handlePointerDown);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        window.clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     setOpen(false);
     navigate('/login');
+  };
+
+  const openMenu = () => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+
+    setOpen(true);
+  };
+
+  const closeMenu = () => {
+    closeTimerRef.current = window.setTimeout(() => {
+      setOpen(false);
+    }, 120);
   };
 
   const handleSearch = (e) => {
@@ -107,12 +131,19 @@ export default function Navbar({ onMenuClick }) {
           <div
             ref={menuRef}
             className="relative"
-            onMouseEnter={() => setOpen(true)}
-            onMouseLeave={() => setOpen(false)}
+            onMouseEnter={openMenu}
+            onMouseLeave={closeMenu}
           >
             <button
               type="button"
-              onClick={() => setOpen((value) => !value)}
+              onClick={() => {
+                if (closeTimerRef.current) {
+                  window.clearTimeout(closeTimerRef.current);
+                  closeTimerRef.current = null;
+                }
+
+                setOpen((value) => !value);
+              }}
               className="flex h-10 items-center gap-3 rounded-full border border-[#d1d5db] bg-white px-3 text-sm font-medium text-[#111827] transition-colors duration-150 hover:bg-[#f9fafb]"
               aria-label="Account menu"
             >
@@ -124,6 +155,8 @@ export default function Navbar({ onMenuClick }) {
             </button>
 
             <div
+              onMouseEnter={openMenu}
+              onMouseLeave={closeMenu}
               className={`absolute right-0 top-[calc(100%+8px)] w-40 rounded-2xl border border-[#e5e7eb] bg-white p-2 shadow-[0_16px_32px_rgba(17,24,39,0.12)] transition-all duration-150 ${
                 open ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none -translate-y-1 opacity-0'
               }`}
