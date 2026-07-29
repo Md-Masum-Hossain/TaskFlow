@@ -259,8 +259,7 @@ export default function TasksPage() {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#111827]">Kanban Board</h2>
-          <span className="text-[13px] text-[#9ca3af]">Static mock data</span>
+          <h2 className="text-lg font-semibold text-[#111827]">Task Overview</h2>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-3">

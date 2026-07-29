@@ -1,5 +1,4 @@
-import { updateTask } from '../../../../../server/src/controllers/task.controller';
-import baseApi from '../../../app/api/baseApi';
+import {baseApi} from '../../../app/api/baseApi';
 
 export const tasksApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({

@@ -1,95 +1,8 @@
 import PriorityBadge from '../features/tasks/components/PriorityBadge';
 import { getPriorityBadgeClass, getPriorityTextClass, getStatusBadgeClass, getStatusTextClass } from '../features/tasks/utils/badgeVariants';
+import { useState } from 'react';
+import { useGetTasksQuery } from '../features/tasks/api/tasksApi';
 
-const stats = [
-  {
-    label: 'Total Tasks',
-    value: '128',
-    detail: '+12 since last week',
-  },
-  {
-    label: 'In Progress',
-    value: '34',
-    detail: 'Work currently active',
-  },
-  {
-    label: 'Completed',
-    value: '81',
-    detail: 'Tasks delivered on time',
-  },
-  {
-    label: 'Overdue',
-    value: '13',
-    detail: 'Needs immediate attention',
-  },
-];
-
-const statusSummary = [
-  { label: 'To Do', value: '27', tone: getStatusBadgeClass('todo'), labelTone: getStatusTextClass('todo') },
-  { label: 'In Progress', value: '34', tone: getStatusBadgeClass('in-progress'), labelTone: getStatusTextClass('in-progress') },
-  { label: 'Completed', value: '81', tone: getStatusBadgeClass('completed'), labelTone: getStatusTextClass('completed') },
-];
-
-const prioritySummary = [
-  { label: 'High Priority', value: '19', tone: getPriorityBadgeClass('high'), labelTone: getPriorityTextClass('high') },
-  { label: 'Medium Priority', value: '53', tone: getPriorityBadgeClass('medium'), labelTone: getPriorityTextClass('medium') },
-  { label: 'Low Priority', value: '56', tone: getPriorityBadgeClass('low'), labelTone: getPriorityTextClass('low') },
-];
-
-const kanbanColumns = [
-  {
-    id: 'todo',
-    title: 'To Do',
-    count: 3,
-    cards: [
-      {
-        title: 'Design landing page revisions',
-        description: 'Refine copy hierarchy and spacing based on the latest review.',
-        priority: 'High',
-        dueDate: 'Due Aug 2',
-        assignee: 'Masum Hossain',
-      },
-      {
-        title: 'Prepare sprint planning notes',
-        description: 'Collect blockers and estimate work for the upcoming sprint.',
-        priority: 'Medium',
-        dueDate: 'Due Aug 3',
-        assignee: 'Arafat Khan',
-      },
-    ],
-  },
-  {
-    id: 'progress',
-    title: 'In Progress',
-    count: 2,
-    cards: [
-      {
-        title: 'Review API contract updates',
-        description: 'Align payload fields with the backend contract changes.',
-        priority: 'Low',
-        dueDate: 'Due Aug 5',
-        assignee: 'Sadia Rahman',
-      },
-    ],
-  },
-  {
-    id: 'done',
-    title: 'Done',
-    count: 4,
-    cards: [],
-  },
-];
-
-const taskSummarySections = [
-  {
-    title: 'Tasks by Status',
-    items: statusSummary,
-  },
-  {
-    title: 'Tasks by Priority',
-    items: prioritySummary,
-  },
-];
 
 function SectionCard({ children, className = '' }) {
   return (
@@ -174,6 +87,78 @@ function SummaryList({ title, items }) {
 }
 
 export default function DashboardPage() {
+  const { data, isLoading, isError } = useGetTasksQuery();
+  const tasks = data || [];
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((task) => task.status === 'completed').length;
+  const inProgressTasks = tasks.filter((task) => task.status === 'in-progress').length;
+  const todoTasks = tasks.filter((task) => task.status === 'todo').length;
+  const overdueTasks = tasks.filter((task) => task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'completed').length;
+
+  const stats = [
+    { label: 'Total Tasks', value: totalTasks, detail: 'All tasks in the system' },
+    { label: 'Completed Tasks', value: completedTasks, detail: 'Tasks marked as completed' },
+    { label: 'In Progress Tasks', value: inProgressTasks, detail: 'Tasks currently in progress' },
+    { label: 'To Do Tasks', value: todoTasks, detail: 'Tasks yet to be started' },
+  ];
+
+  const statusSummary = [
+    { value: completedTasks, label: 'Completed', tone: getStatusBadgeClass('completed'), labelTone: getStatusTextClass('completed') },
+    { value: inProgressTasks, label: 'In Progress', tone: getStatusBadgeClass('in-progress'), labelTone: getStatusTextClass('in-progress') },
+    { value: todoTasks, label: 'To Do', tone: getStatusBadgeClass('todo'), labelTone: getStatusTextClass('todo') },
+    { value: overdueTasks, label: 'Overdue', tone: getStatusBadgeClass('overdue'), labelTone: getStatusTextClass('overdue') },
+  ];
+
+  const prioritySummary = [
+    { value: tasks.filter((task) => task.priority === 'high').length, label: 'High Priority', tone: getPriorityBadgeClass('high'), labelTone: getPriorityTextClass('high') },
+    { value: tasks.filter((task) => task.priority === 'medium').length, label: 'Medium Priority', tone: getPriorityBadgeClass('medium'), labelTone: getPriorityTextClass('medium') },
+    { value: tasks.filter((task) => task.priority === 'low').length, label: 'Low Priority', tone: getPriorityBadgeClass('low'), labelTone: getPriorityTextClass('low') },
+  ];
+
+  const taskSummarySections = [
+    { title: 'Task Status Summary', items: statusSummary },
+    { title: 'Task Priority Summary', items: prioritySummary },
+  ];
+
+  const kanbanColumns = [
+    {
+      id: 'todo',
+      title: 'To Do',
+      count: todoTasks,
+      cards: tasks.filter((task) => task.status === 'todo').map((task) => ({
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        dueDate: task.dueDate,
+        assignee: task.assignee,
+      })),
+    },
+    {
+      id: 'in-progress',
+      title: 'In Progress',
+      count: inProgressTasks,
+      cards: tasks.filter((task) => task.status === 'in-progress').map((task) => ({
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        dueDate: task.dueDate,
+        assignee: task.assignee,
+      })),
+    },
+    {
+      id: 'completed',
+      title: 'Completed',
+      count: completedTasks,
+      cards: tasks.filter((task) => task.status === 'completed').map((task) => ({
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        dueDate: task.dueDate,
+        assignee: task.assignee,
+      })),
+    },
+  ];
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -208,8 +193,7 @@ export default function DashboardPage() {
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[#111827]">Kanban Board Preview</h2>
-          <span className="text-[13px] text-[#9ca3af]">Static mock data</span>
+          <h2 className="text-lg font-semibold text-[#111827]">Task Overview</h2>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-3">
