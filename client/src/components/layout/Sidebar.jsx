@@ -13,7 +13,7 @@ export default function Sidebar({ isOpen, onClose }) {
   return (
     <>
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 border-r border-[#242730] bg-[#2F313A] px-4 py-5 text-white transition-transform duration-200 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 w-64 border-r border-[#242730] bg-[#2F313A] px-4 py-5 text-white transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:self-start lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
