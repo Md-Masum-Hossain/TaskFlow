@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import TaskColumn from '../features/tasks/components/TaskColumn';
 import TaskModal from '../components/tasks/TaskModal';
 import DeleteConfirmationDialog from '../features/tasks/components/DeleteConfirmationDialog';
+import TaskFilters from '../features/tasks/components/TaskFilters';
 import { useGetTasksQuery, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } from '../features/tasks/api/tasksApi';
 import { useDebounce } from 'use-debounce';
 
@@ -43,36 +44,40 @@ function SummaryList({ title, items }) {
 
 export default function TasksPage() {
    const [search, setSearch] = useState('');
+   const [priorityFilter, setPriorityFilter] = useState('');
+   const [statusFilter, setStatusFilter] = useState('');
 
   const [debouncedSearch] = useDebounce(search, 500);
   const [searchParams] = useSearchParams();
 
   const { data: tasksData, isLoading, isError } = useGetTasksQuery({
     search: debouncedSearch,
-    
+    priority: priorityFilter,
+    status: statusFilter,
   });
   const [createTask] = useCreateTaskMutation();
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask, { isLoading: isDeleting }] = useDeleteTaskMutation();
+  const tasks = tasksData || [];
 
   const kanbanColumns = [
     {
       id: 'todo',
       title: 'To Do',
-      count: tasksData?.filter((task) => task.status === 'todo').length || 0,
-      tasks: tasksData?.filter((task) => task.status === 'todo') || [],
+      count: tasks.filter((task) => task.status === 'todo').length || 0,
+      tasks: tasks.filter((task) => task.status === 'todo') || [],
     },
     {
       id: 'in-progress',
       title: 'In Progress',
-      count: tasksData?.filter((task) => task.status === 'in-progress').length || 0,
-      tasks: tasksData?.filter((task) => task.status === 'in-progress') || [],
+      count: tasks.filter((task) => task.status === 'in-progress').length || 0,
+      tasks: tasks.filter((task) => task.status === 'in-progress') || [],
     },
     {
       id: 'completed',
       title: 'Completed',
-      count: tasksData?.filter((task) => task.status === 'completed').length || 0,
-      tasks: tasksData?.filter((task) => task.status === 'completed') || [],
+      count: tasks.filter((task) => task.status === 'completed').length || 0,
+      tasks: tasks.filter((task) => task.status === 'completed') || [],
     },
   ];
 
@@ -88,9 +93,9 @@ export default function TasksPage() {
     {
       title: 'Tasks by Priority',
       items: [
-        { label: 'High Priority', value: tasksData?.filter((task) => task.priority === 'high').length || 0, tone: 'bg-[#fef3f2] text-[#b42318]' },
-        { label: 'Medium Priority', value: tasksData?.filter((task) => task.priority === 'medium').length || 0, tone: 'bg-[#fffaeb] text-[#b54708]' },
-        { label: 'Low Priority', value: tasksData?.filter((task) => task.priority === 'low').length || 0, tone: 'bg-[#eff8ff] text-[#175cd3]' },
+        { label: 'High Priority', value: tasks.filter((task) => task.priority === 'high').length || 0, tone: 'bg-[#fef3f2] text-[#b42318]' },
+        { label: 'Medium Priority', value: tasks.filter((task) => task.priority === 'medium').length || 0, tone: 'bg-[#fffaeb] text-[#b54708]' },
+        { label: 'Low Priority', value: tasks.filter((task) => task.priority === 'low').length || 0, tone: 'bg-[#eff8ff] text-[#175cd3]' },
       ],
     },
   ];
@@ -176,6 +181,14 @@ export default function TasksPage() {
     const searchParam = searchParams.get('search') || '';
     setSearch(searchParam);
   }, [searchParams]);
+
+  useEffect(() => {
+    const nextPriority = searchParams.get('priority') || '';
+    const nextStatus = searchParams.get('status') || '';
+
+    setPriorityFilter(nextPriority);
+    setStatusFilter(nextStatus);
+  }, [searchParams]);
   
 
 
@@ -225,33 +238,12 @@ export default function TasksPage() {
               </div>
             </div>
 
-            <div>
-              <label className="mb-2 block text-[13px] font-medium text-[#6b7280]" htmlFor="priority-filter">
-                Priority filter
-              </label>
-              <button
-                id="priority-filter"
-                type="button"
-                className="flex h-[52px] w-full items-center justify-between rounded-xl border border-[#d1d5db] bg-white px-4 text-[16px] text-[#111827]"
-              >
-                <span>All priorities</span>
-                <span className="text-[#9ca3af]">▾</span>
-              </button>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-[13px] font-medium text-[#6b7280]" htmlFor="status-filter">
-                Status filter
-              </label>
-              <button
-                id="status-filter"
-                type="button"
-                className="flex h-[52px] w-full items-center justify-between rounded-xl border border-[#d1d5db] bg-white px-4 text-[16px] text-[#111827]"
-              >
-                <span>All statuses</span>
-                <span className="text-[#9ca3af]">▾</span>
-              </button>
-            </div>
+            <TaskFilters
+              priority={priorityFilter}
+              status={statusFilter}
+              onPriorityChange={setPriorityFilter}
+              onStatusChange={setStatusFilter}
+            />
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
