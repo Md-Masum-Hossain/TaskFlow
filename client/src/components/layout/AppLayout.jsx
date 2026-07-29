@@ -7,7 +7,7 @@ export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#f6f8fc] text-[#111827] lg:flex">
+    <div className="min-h-screen bg-[#f8fafc] text-[#111827] lg:flex">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex min-h-screen flex-1 flex-col">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />

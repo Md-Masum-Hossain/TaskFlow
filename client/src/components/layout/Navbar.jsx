@@ -60,9 +60,9 @@ export default function Navbar({ onMenuClick }) {
           </div>
         </div>
 
-        <div className="ml-auto hidden w-full max-w-[420px] items-center rounded-xl border border-[#d1d5db] bg-white px-4 py-0 sm:flex h-[52px]">
+        <div className="ml-auto hidden h-[52px] w-full max-w-[420px] items-center rounded-xl border border-[#d1d5db] bg-white px-4 sm:flex">
           <FiSearch className="h-4 w-4 text-[#9ca3af]" />
-          <span className="ml-2 text-sm text-[#9ca3af]">Search tasks, projects, team members...</span>
+          <span className="ml-2 text-[16px] text-[#9ca3af]">Search tasks, projects, team members...</span>
           <span className="ml-auto text-xs font-medium text-[#9ca3af]">⌘K</span>
         </div>
       </div>

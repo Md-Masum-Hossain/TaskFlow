@@ -1,4 +1,7 @@
+import { useState } from 'react';
+
 import TaskColumn from '../features/tasks/components/TaskColumn';
+import TaskModal from '../components/tasks/TaskModal';
 
 const kanbanColumns = [
   {
@@ -11,7 +14,8 @@ const kanbanColumns = [
         title: 'Design task list filters',
         description: 'Review the filter layout and align controls with the board header.',
         priority: 'High',
-        dueDate: 'Due Aug 2',
+        status: 'todo',
+        dueDate: '2026-08-02',
         assignee: 'Masum Hossain',
       },
       {
@@ -19,7 +23,8 @@ const kanbanColumns = [
         title: 'Prepare sprint task notes',
         description: 'Collect review points and open items before the next planning session.',
         priority: 'Medium',
-        dueDate: 'Due Aug 3',
+        status: 'todo',
+        dueDate: '2026-08-03',
         assignee: 'Arafat Khan',
       },
       {
@@ -27,7 +32,8 @@ const kanbanColumns = [
         title: 'Update task priority copy',
         description: 'Refine the visible labels used across the task cards and filters.',
         priority: 'Low',
-        dueDate: 'Due Aug 5',
+        status: 'todo',
+        dueDate: '2026-08-05',
         assignee: 'Sadia Rahman',
       },
     ],
@@ -42,7 +48,8 @@ const kanbanColumns = [
         title: 'Polish board/list toggle',
         description: 'Keep the toggle visually aligned with the search and filter controls.',
         priority: 'High',
-        dueDate: 'Due Aug 6',
+        status: 'in-progress',
+        dueDate: '2026-08-06',
         assignee: 'Nusrat Jahan',
       },
       {
@@ -50,7 +57,8 @@ const kanbanColumns = [
         title: 'Refine task card spacing',
         description: 'Tune the card internals so the board feels consistent across columns.',
         priority: 'Medium',
-        dueDate: 'Due Aug 7',
+        status: 'in-progress',
+        dueDate: '2026-08-07',
         assignee: 'Masum Hossain',
       },
     ],
@@ -65,7 +73,8 @@ const kanbanColumns = [
         title: 'Finalize task board header',
         description: 'Lock the header, filters, and add button presentation for handoff.',
         priority: 'High',
-        dueDate: 'Due Jul 30',
+        status: 'completed',
+        dueDate: '2026-07-30',
         assignee: 'Masum Hossain',
       },
     ],
@@ -124,6 +133,36 @@ function SummaryList({ title, items }) {
 }
 
 export default function TasksPage() {
+  const [modalState, setModalState] = useState({
+    open: false,
+    mode: 'create',
+    initialValues: null,
+  });
+
+  const openCreateModal = () => {
+    setModalState({
+      open: true,
+      mode: 'create',
+      initialValues: null,
+    });
+  };
+
+  const openEditModal = (task) => {
+    setModalState({
+      open: true,
+      mode: 'edit',
+      initialValues: task,
+    });
+  };
+
+  const closeModal = () => {
+    setModalState((current) => ({ ...current, open: false }));
+  };
+
+  const handleSubmitTask = () => {
+    closeModal();
+  };
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -209,6 +248,7 @@ export default function TasksPage() {
 
             <button
               type="button"
+              onClick={openCreateModal}
               className="inline-flex h-[52px] items-center justify-center rounded-[10px] bg-[#2563eb] px-4 text-[16px] font-semibold text-white transition-colors duration-150 hover:bg-[#1d4ed8]"
             >
               Add Task
@@ -225,7 +265,13 @@ export default function TasksPage() {
 
         <div className="grid gap-4 xl:grid-cols-3">
           {kanbanColumns.map((column) => (
-            <TaskColumn key={column.id} title={column.title} count={column.count} tasks={column.tasks} />
+            <TaskColumn
+              key={column.id}
+              title={column.title}
+              count={column.count}
+              tasks={column.tasks}
+              onEditTask={openEditModal}
+            />
           ))}
         </div>
       </section>
@@ -235,6 +281,14 @@ export default function TasksPage() {
           <SummaryList key={section.title} title={section.title} items={section.items} />
         ))}
       </section>
+
+      <TaskModal
+        open={modalState.open}
+        mode={modalState.mode}
+        initialValues={modalState.initialValues || undefined}
+        onClose={closeModal}
+        onSubmit={handleSubmitTask}
+      />
     </div>
   );
 }

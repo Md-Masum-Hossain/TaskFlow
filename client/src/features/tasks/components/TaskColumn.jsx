@@ -2,7 +2,7 @@ import EmptyState from './EmptyState';
 import LoadingState from './LoadingState';
 import TaskCard from './TaskCard';
 
-export default function TaskColumn({ title, count, tasks = [], isLoading = false }) {
+export default function TaskColumn({ title, count, tasks = [], isLoading = false, onEditTask = () => {} }) {
   return (
     <section className="min-h-[420px] rounded-[18px] bg-[#eef3ff] p-5 shadow-none">
       <header className="mb-4 flex items-center justify-between">
@@ -26,7 +26,8 @@ export default function TaskColumn({ title, count, tasks = [], isLoading = false
               priority={task.priority}
               dueDate={task.dueDate}
               assignee={task.assignee}
-              status={title === 'To Do' ? 'todo' : title === 'In Progress' ? 'in-progress' : 'completed'}
+              status={task.status || (title === 'To Do' ? 'todo' : title === 'In Progress' ? 'in-progress' : 'completed')}
+              onEdit={() => onEditTask(task)}
             />
           ))}
         </div>

@@ -1,8 +1,4 @@
-const priorityStyles = {
-  high: 'bg-[#fee2e2] text-[#b91c1c]',
-  medium: 'bg-[#fef3c7] text-[#92400e]',
-  low: 'bg-[#dcfce7] text-[#166534]',
-};
+import { getPriorityBadgeClass } from '../utils/badgeVariants';
 
 const priorityLabel = {
   high: 'High',
@@ -11,10 +7,10 @@ const priorityLabel = {
 };
 
 export default function PriorityBadge({ priority = 'medium' }) {
-  const priorityKey = priority.toLowerCase();
+  const priorityKey = String(priority).toLowerCase();
 
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[13px] font-medium ${priorityStyles[priorityKey] || priorityStyles.medium}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[13px] font-medium ${getPriorityBadgeClass(priorityKey)}`}>
       {priorityLabel[priorityKey] || priorityLabel.medium}
     </span>
   );
