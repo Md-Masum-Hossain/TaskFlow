@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FiBell, FiChevronDown, FiLogOut, FiMenu, FiSearch, FiSettings, FiUser } from 'react-icons/fi';
 
 export default function Navbar({ onMenuClick }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
+  const [keyword, setKeyword] = useState('');
   const token = localStorage.getItem('accessToken');
 
   const username = useMemo(() => {
@@ -41,6 +43,16 @@ export default function Navbar({ onMenuClick }) {
     navigate('/login');
   };
 
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const trimmedKeyword = keyword.trim();
+      if (trimmedKeyword) {
+        navigate(`/tasks?search=${encodeURIComponent(trimmedKeyword)}`);
+      }
+    }
+  }
+
   return (
     <header className="flex h-16 items-center border-b border-[#e5e7eb] bg-white px-4 sm:px-6 lg:px-8">
       <div className="flex flex-1 items-center gap-3">
@@ -62,7 +74,15 @@ export default function Navbar({ onMenuClick }) {
 
         <div className="ml-auto hidden h-[52px] w-full max-w-[420px] items-center rounded-xl border border-[#d1d5db] bg-white px-4 sm:flex">
           <FiSearch className="h-4 w-4 text-[#9ca3af]" />
-          <span className="ml-2 text-[16px] text-[#9ca3af]">Search tasks, projects, team members...</span>
+          <input
+            type="text"
+            aria-label="Search tasks, projects, team members"
+            placeholder="Search tasks, projects..."
+            onKeyDown={handleSearch}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="ml-2 h-full w-full border-0 bg-transparent text-[16px] text-[#9ca3af] outline-none placeholder:text-[#9ca3af]"
+          />
           <span className="ml-auto text-xs font-medium text-[#9ca3af]">⌘K</span>
         </div>
       </div>

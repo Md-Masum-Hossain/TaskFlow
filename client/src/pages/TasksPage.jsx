@@ -1,10 +1,10 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import TaskColumn from '../features/tasks/components/TaskColumn';
 import TaskModal from '../components/tasks/TaskModal';
 import DeleteConfirmationDialog from '../features/tasks/components/DeleteConfirmationDialog';
 import { useGetTasksQuery, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } from '../features/tasks/api/tasksApi';
-
+import { useDebounce } from 'use-debounce';
 
 
 
@@ -42,8 +42,15 @@ function SummaryList({ title, items }) {
 }
 
 export default function TasksPage() {
+   const [search, setSearch] = useState('');
 
-  const { data: tasksData, isLoading, isError } = useGetTasksQuery();
+  const [debouncedSearch] = useDebounce(search, 500);
+  const [searchParams] = useSearchParams();
+
+  const { data: tasksData, isLoading, isError } = useGetTasksQuery({
+    search: debouncedSearch,
+    
+  });
   const [createTask] = useCreateTaskMutation();
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask, { isLoading: isDeleting }] = useDeleteTaskMutation();
@@ -165,6 +172,13 @@ export default function TasksPage() {
     }
   };
 
+ useEffect(() => {
+    const searchParam = searchParams.get('search') || '';
+    setSearch(searchParam);
+  }, [searchParams]);
+  
+
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -203,7 +217,9 @@ export default function TasksPage() {
                 <input
                   id="task-search"
                   type="text"
-                  placeholder="Search tasks"
+                  placeholder="Search by title or description..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   className="ml-2 w-full border-0 bg-transparent text-[16px] text-[#111827] outline-none placeholder:text-[#9ca3af]"
                 />
               </div>
@@ -267,7 +283,7 @@ export default function TasksPage() {
         <div className="grid gap-4 xl:grid-cols-3">
           {kanbanColumns.map((column) => (
             <TaskColumn
-              key={column.id}
+              key={column._id}
               title={column.title}
               count={column.count}
               tasks={column.tasks}

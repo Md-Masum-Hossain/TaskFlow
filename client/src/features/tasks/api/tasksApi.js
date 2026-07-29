@@ -3,7 +3,22 @@ import {baseApi} from '../../../app/api/baseApi';
 export const tasksApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getTasks: builder.query({
-            query: () => '/tasks',
+            query: (filters = {}) => {
+                const {
+                     search = '', 
+                     status = '', 
+                     priority = ''
+                    } = filters;
+
+                return {
+                    url : '/tasks',
+                    params : {
+                        search,
+                        status,
+                        priority
+                    }
+                };
+            },
             providesTags: ['Tasks']
         }),
         createTask: builder.mutation({
