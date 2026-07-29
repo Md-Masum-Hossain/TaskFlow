@@ -1,15 +1,25 @@
-export default function TaskCard({ title, description, priority, dueDate, assignee }) {
-  return (
-    <article className="rounded-2xl border border-[#eaecf0] bg-white p-4 shadow-[0_1px_2px_rgba(16,24,40,0.06)]">
-      <p className="text-sm font-semibold text-[#101828]">{title}</p>
-      <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#667085]">{description}</p>
+import { FiCalendar } from 'react-icons/fi';
+import PriorityBadge from './PriorityBadge';
+import StatusBadge from './StatusBadge';
 
-      <div className="mt-4 flex items-center justify-between text-xs">
-        <span className="rounded-full bg-[#eff8ff] px-2.5 py-1 font-medium text-[#175cd3]">{priority}</span>
-        <span className="text-[#667085]">{dueDate}</span>
+export default function TaskCard({ title, description, priority, dueDate, assignee, status = 'todo' }) {
+  return (
+    <article className="rounded-[14px] bg-white p-5 shadow-[0_6px_18px_rgba(17,24,39,0.06)] transition-all duration-150 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(17,24,39,0.08)]">
+      <div className="flex items-start justify-between gap-3">
+        <StatusBadge status={status} />
+        <PriorityBadge priority={priority} />
       </div>
 
-      <div className="mt-3 text-xs font-medium text-[#344054]">{assignee}</div>
+      <p className="mt-3 text-[18px] font-semibold leading-6 text-[#111827]">{title}</p>
+      <p className="mt-2 text-[16px] leading-6 text-[#6b7280]">{description}</p>
+
+      <div className="mt-5 flex items-center justify-between text-[13px] text-[#9ca3af]">
+        <span className="flex items-center gap-1.5">
+          <FiCalendar className="h-4 w-4" />
+          <span>{dueDate}</span>
+        </span>
+        <span className="font-medium text-[#6b7280]">{assignee}</span>
+      </div>
     </article>
   );
 }

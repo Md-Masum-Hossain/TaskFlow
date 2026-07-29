@@ -3,6 +3,7 @@ import AppLayout from '../components/layout/AppLayout';
 import DashboardPage from '../pages/DashboardPage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import TasksPage from '../pages/TasksPage';
 import ProtectedRoute from './Protected.route';
 import GuestRoute from './guest.route';
 
@@ -25,6 +26,7 @@ export default function AppRoutes() {
         </ProtectedRoute>
       }>
         <Route index element={<DashboardPage />} />
+        <Route path="tasks" element={<TasksPage />} />
         <Route path="dashboard" element={<DashboardPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

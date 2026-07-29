@@ -1,21 +1,21 @@
-const priorityClasses = {
-  low: 'bg-[#f0f9ff] text-[#026aa2]',
-  medium: 'bg-[#fffaeb] text-[#b54708]',
-  high: 'bg-[#fef3f2] text-[#b42318]',
+const priorityStyles = {
+  high: 'bg-[#fee2e2] text-[#b91c1c]',
+  medium: 'bg-[#fef3c7] text-[#92400e]',
+  low: 'bg-[#dcfce7] text-[#166534]',
 };
 
 const priorityLabel = {
-  low: 'Low',
-  medium: 'Medium',
   high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 };
 
 export default function PriorityBadge({ priority = 'medium' }) {
+  const priorityKey = priority.toLowerCase();
+
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${priorityClasses[priority] || priorityClasses.medium}`}
-    >
-      {priorityLabel[priority] || priorityLabel.medium}
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[13px] font-medium ${priorityStyles[priorityKey] || priorityStyles.medium}`}>
+      {priorityLabel[priorityKey] || priorityLabel.medium}
     </span>
   );
 }

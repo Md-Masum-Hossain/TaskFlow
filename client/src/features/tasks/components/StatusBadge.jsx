@@ -1,7 +1,7 @@
-const statusClasses = {
-  todo: 'bg-[#f2f4f7] text-[#344054]',
-  'in-progress': 'bg-[#eff8ff] text-[#175cd3]',
-  completed: 'bg-[#ecfdf3] text-[#067647]',
+const statusStyles = {
+  todo: 'bg-[#f3f4f6] text-[#6b7280]',
+  'in-progress': 'bg-[#eff6ff] text-[#2563eb]',
+  completed: 'bg-[#ecfdf3] text-[#16a34a]',
 };
 
 const statusLabel = {
@@ -11,11 +11,11 @@ const statusLabel = {
 };
 
 export default function StatusBadge({ status = 'todo' }) {
+  const statusKey = status.toLowerCase();
+
   return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${statusClasses[status] || statusClasses.todo}`}
-    >
-      {statusLabel[status] || statusLabel.todo}
+    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[13px] font-medium ${statusStyles[statusKey] || statusStyles.todo}`}>
+      {statusLabel[statusKey] || statusLabel.todo}
     </span>
   );
 }
