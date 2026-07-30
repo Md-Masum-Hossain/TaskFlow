@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import app from './app.js';
-import connectDB from './config/db.config.js';
+import connectDB from './src/config/db.config.js';
 
 const PORT = process.env.PORT;
 console.log(process.cwd());

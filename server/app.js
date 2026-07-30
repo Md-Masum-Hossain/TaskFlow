@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authRoutes from './routes/auth.routes.js';
-import taskRoutes from './routes/task.routes.js';
-import { notFound, errorHandler } from './middleware/error.middleware.js';
+import authRoutes from './src/routes/auth.routes.js';
+import taskRoutes from './src/routes/task.routes.js';
+import { notFound, errorHandler } from './src/middleware/error.middleware.js';
 
 const app = express();
 
