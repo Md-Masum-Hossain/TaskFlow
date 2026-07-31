@@ -200,7 +200,7 @@ export default function TaskModal({ open = false, onClose = () => {}, mode = 'cr
 
   const modal = (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.45)] px-4 py-6 transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[rgba(0,0,0,0.45)] px-4 py-4 sm:items-center sm:py-6 transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
       onMouseDown={handleBackdropMouseDown}
       aria-hidden={!isVisible}
     >
@@ -208,11 +208,11 @@ export default function TaskModal({ open = false, onClose = () => {}, mode = 'cr
         role="dialog"
         aria-modal="true"
         aria-labelledby="task-modal-title"
-        className={`w-full max-w-[640px] rounded-xl bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] transition-all duration-200 ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
+        className={`w-full max-w-[640px] max-h-[calc(100vh-2rem)] overflow-y-auto rounded-xl bg-white shadow-[0_24px_80px_rgba(15,23,42,0.18)] transition-all duration-200 sm:max-h-[calc(100vh-3rem)] ${isVisible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
       >
-        <div className="flex items-start justify-between border-b border-[#eaecf0] px-6 py-5">
+        <div className="flex items-start justify-between gap-4 border-b border-[#eaecf0] px-4 py-4 sm:px-6 sm:py-5">
           <div>
-            <h2 id="task-modal-title" className="text-xl font-semibold tracking-[-0.02em] text-[#101828]">
+            <h2 id="task-modal-title" className="text-lg font-semibold tracking-[-0.02em] text-[#101828] sm:text-xl">
               {title}
             </h2>
             <p className="mt-1 text-sm text-[#667085]">Fill out the task details to continue.</p>
@@ -228,7 +228,7 @@ export default function TaskModal({ open = false, onClose = () => {}, mode = 'cr
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-5 px-6 py-6">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5 px-4 py-4 sm:px-6 sm:py-6">
           <Input
             id="task-title"
             label="Task Title *"
@@ -297,12 +297,12 @@ export default function TaskModal({ open = false, onClose = () => {}, mode = 'cr
             />
           </div>
 
-          <div className="flex items-center justify-between gap-3 border-t border-[#eaecf0] pt-5">
-            <Button variant="secondary" onClick={onClose} className="px-5">
+          <div className="flex flex-col-reverse gap-3 border-t border-[#eaecf0] pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <Button variant="secondary" onClick={onClose} className="w-full px-5 sm:w-auto">
               Cancel
             </Button>
 
-            <Button type="submit" className="px-5 bg-[#2563eb] hover:bg-[#1d4ed8]">
+            <Button type="submit" className="w-full px-5 bg-[#2563eb] hover:bg-[#1d4ed8] sm:w-auto">
               {submitLabel}
             </Button>
           </div>
