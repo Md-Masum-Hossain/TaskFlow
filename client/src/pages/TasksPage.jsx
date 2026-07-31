@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import TaskColumn from '../features/tasks/components/TaskColumn';
+import TaskCard from '../features/tasks/components/TaskCard';
 import TaskModal from '../components/tasks/TaskModal';
 import DeleteConfirmationDialog from '../features/tasks/components/DeleteConfirmationDialog';
 import TaskFilters from '../features/tasks/components/TaskFilters';
 import { useGetTasksQuery, useCreateTaskMutation, useUpdateTaskMutation, useDeleteTaskMutation } from '../features/tasks/api/tasksApi';
 import { useDebounce } from 'use-debounce';
+import { DndContext, PointerSensor, useSensor, useSensors, closestCorners, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useTaskDragAndDrop } from '../hooks/useTaskDragAndDrop';
 
 
 
@@ -43,12 +47,20 @@ function SummaryList({ title, items }) {
 }
 
 export default function TasksPage() {
-   const [search, setSearch] = useState('');
-   const [priorityFilter, setPriorityFilter] = useState('');
-   const [statusFilter, setStatusFilter] = useState('');
+  const [search, setSearch] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const [debouncedSearch] = useDebounce(search, 500);
   const [searchParams] = useSearchParams();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
   const { data: tasksData, isLoading, isError } = useGetTasksQuery({
     search: debouncedSearch,
@@ -58,26 +70,43 @@ export default function TasksPage() {
   const [createTask] = useCreateTaskMutation();
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask, { isLoading: isDeleting }] = useDeleteTaskMutation();
-  const tasks = tasksData || [];
+  const [localTasks, setLocalTasks] = useState([]);
+
+  useEffect(() => {
+    if (tasksData) {
+      setLocalTasks(tasksData);
+    }
+  }, [tasksData]);
+  const {
+    activeTask,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnd,
+    handleDragCancel,
+  } = useTaskDragAndDrop(
+    updateTask,
+    localTasks,
+    setLocalTasks
+  );
 
   const kanbanColumns = [
     {
       id: 'todo',
       title: 'To Do',
-      count: tasks.filter((task) => task.status === 'todo').length || 0,
-      tasks: tasks.filter((task) => task.status === 'todo') || [],
+      count: localTasks.filter((task) => task.status === 'todo').length || 0,
+      tasks: localTasks.filter((task) => task.status === 'todo') || [],
     },
     {
       id: 'in-progress',
       title: 'In Progress',
-      count: tasks.filter((task) => task.status === 'in-progress').length || 0,
-      tasks: tasks.filter((task) => task.status === 'in-progress') || [],
+      count: localTasks.filter((task) => task.status === 'in-progress').length || 0,
+      tasks: localTasks.filter((task) => task.status === 'in-progress') || [],
     },
     {
       id: 'completed',
       title: 'Completed',
-      count: tasks.filter((task) => task.status === 'completed').length || 0,
-      tasks: tasks.filter((task) => task.status === 'completed') || [],
+      count: localTasks.filter((task) => task.status === 'completed').length || 0,
+      tasks: localTasks.filter((task) => task.status === 'completed') || [],
     },
   ];
 
@@ -93,9 +122,9 @@ export default function TasksPage() {
     {
       title: 'Tasks by Priority',
       items: [
-        { label: 'High Priority', value: tasks.filter((task) => task.priority === 'high').length || 0, tone: 'bg-[#fef3f2] text-[#b42318]' },
-        { label: 'Medium Priority', value: tasks.filter((task) => task.priority === 'medium').length || 0, tone: 'bg-[#fffaeb] text-[#b54708]' },
-        { label: 'Low Priority', value: tasks.filter((task) => task.priority === 'low').length || 0, tone: 'bg-[#eff8ff] text-[#175cd3]' },
+        { label: 'High Priority', value: localTasks.filter((task) => task.priority === 'high').length || 0, tone: 'bg-[#fef3f2] text-[#b42318]' },
+        { label: 'Medium Priority', value: localTasks.filter((task) => task.priority === 'medium').length || 0, tone: 'bg-[#fffaeb] text-[#b54708]' },
+        { label: 'Low Priority', value: localTasks.filter((task) => task.priority === 'low').length || 0, tone: 'bg-[#eff8ff] text-[#175cd3]' },
       ],
     },
   ];
@@ -154,10 +183,10 @@ export default function TasksPage() {
       if (modalState.mode === 'create') {
         await createTask(taskData).unwrap();
       } else if (modalState.mode === 'edit') {
-          await updateTask({
-            id: taskData._id,
-            ...taskData,
-          }).unwrap();
+        await updateTask({
+          id: taskData._id,
+          ...taskData,
+        }).unwrap();
       }
     } catch (error) {
       console.error('Error submitting task:', error);
@@ -178,7 +207,7 @@ export default function TasksPage() {
     }
   };
 
- useEffect(() => {
+  useEffect(() => {
     const searchParam = searchParams.get('search') || '';
     setSearch(searchParam);
   }, [searchParams]);
@@ -190,7 +219,7 @@ export default function TasksPage() {
     setPriorityFilter(nextPriority);
     setStatusFilter(nextStatus);
   }, [searchParams]);
-  
+
 
 
   return (
@@ -199,10 +228,10 @@ export default function TasksPage() {
         <div>
           <p className="text-[13px] font-medium text-[#6b7280]">Tasks</p>
           <h1 className="mt-1 text-[36px] font-bold tracking-[-0.04em] text-[#111827]">
-            Task Page
+            Task Management
           </h1>
           <p className="mt-2 max-w-2xl text-[16px] leading-6 text-[#6b7280]">
-            View and organize active work with a lightweight static task board preview.
+            Manage tasks, track progress, and stay organized.
           </p>
         </div>
 
@@ -248,14 +277,14 @@ export default function TasksPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <div className="inline-flex rounded-xl border border-[#d1d5db] bg-white p-1">
+            {/* <div className="inline-flex rounded-xl border border-[#d1d5db] bg-white p-1">
               <button type="button" className="rounded-lg bg-[#eff6ff] px-3 py-2 text-[16px] font-medium text-[#2563eb] transition-colors duration-150 hover:bg-[#dbeafe]">
                 Board
               </button>
               <button type="button" className="rounded-lg px-3 py-2 text-[16px] font-medium text-[#6b7280] transition-colors duration-150 hover:text-[#111827]">
                 List
               </button>
-            </div>
+            </div> */}
 
             <button
               type="button"
@@ -273,18 +302,40 @@ export default function TasksPage() {
           <h2 className="text-lg font-semibold text-[#111827]">Task Overview</h2>
         </div>
 
-        <div className="grid gap-4 xl:grid-cols-3">
-          {kanbanColumns.map((column) => (
-            <TaskColumn
-              key={column._id}
-              title={column.title}
-              count={column.count}
-              tasks={column.tasks}
-              onEditTask={openEditModal}
-              onDeleteTask={openDeleteModal}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+        >
+          <div className="grid gap-4 xl:grid-cols-3">
+            {kanbanColumns.map((column) => (
+              <SortableContext key={column.id} items={column.tasks.map(task => task._id)} strategy={verticalListSortingStrategy}>
+                <TaskColumn
+                  key={column.id}
+                  id={column.id}
+                  title={column.title}
+                  count={column.count}
+                  tasks={column.tasks}
+                  onEditTask={openEditModal}
+                  onDeleteTask={openDeleteModal}
+                />
+              </SortableContext>
+            ))}
+          </div>
+          <DragOverlay>
+            {activeTask ? (
+              <TaskCard
+                overlay
+                task={activeTask}
+                onEdit={() => { }}
+                onDelete={() => { }}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
