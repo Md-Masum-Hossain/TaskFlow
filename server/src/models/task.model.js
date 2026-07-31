@@ -26,10 +26,14 @@ const taskSchema = new mongoose.Schema(
 			ref: 'User',
 			required: true,
 		},
-		date: {
+		dueDate: {
 			type: Date,
 			default: Date.now,
 			required: true,
+		},
+		assignee: {
+			type: String,
+			trim: true,
 		},
 	},
 	{ timestamps: true }

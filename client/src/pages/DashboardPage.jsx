@@ -89,6 +89,7 @@ function SummaryList({ title, items }) {
 export default function DashboardPage() {
   const { data, isLoading, isError } = useGetTasksQuery();
   const tasks = data || [];
+  console.log("Data =>", tasks);
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((task) => task.status === 'completed').length;
   const inProgressTasks = tasks.filter((task) => task.status === 'in-progress').length;

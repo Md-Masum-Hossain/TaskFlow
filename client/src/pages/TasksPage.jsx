@@ -149,6 +149,7 @@ export default function TasksPage() {
   };
 
   const handleSubmitTask = async (taskData) => {
+    console.log('Submitting task:', taskData);
     try {
       if (modalState.mode === 'create') {
         await createTask(taskData).unwrap();

@@ -21,6 +21,7 @@ export const getTasks = asyncHandler(async (req, res) => {
 });
 
 export const createTask = asyncHandler(async (req, res) => {
+   console.log("Controller:", req.body);
   const task = await new Task({
     ...req.body,
     user : req.user.id,
