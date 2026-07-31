@@ -236,7 +236,7 @@ export default function TasksPage() {
         </div>
 
         <div className="inline-flex items-center rounded-full border border-[#e5e7eb] bg-white px-3 py-2 text-[13px] font-medium text-[#6b7280]">
-          Updated today
+          Updated Now
         </div>
       </header>
 
