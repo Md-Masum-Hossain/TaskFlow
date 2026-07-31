@@ -20,90 +20,151 @@ TaskFlow is a full-stack task management application built with a React client a
 
 The repository currently focuses on task management flows rather than a separate issue-tracking module. This README documents only what is implemented in the codebase today.
 
-## 3. Features
-- JWT-based authentication with register, login, logout, and refresh-token support.
-- Protected application routes and guest-only authentication routes.
-- RTK Query data fetching with automatic refresh-token retry logic.
-- Dashboard page with live task counts, task status summaries, task priority summaries, and kanban previews.
-- Task board page with create, edit, and delete task actions.
-- Backend-driven task search and filtering by title/description, status, and priority.
-- Reusable task modal, task filters, task action menu, and delete confirmation dialog.
-- Responsive layout with a collapsible sidebar and adaptive header/content sections.
-- Server-side validation with Zod for auth and task payloads.
-- Client-side validation for required task modal fields.
-- Toast notifications for auth actions.
+## Features
 
-## 4. Tech Stack
+- User registration, login, logout, and refresh-token authentication
+- Protected application routes and guest-only auth routes
+- Dashboard with task totals, status summaries, priority summaries, and kanban previews
+- Task board with create, edit, delete, search, filter, and drag-and-drop status updates
+- Task filtering by search term, status, and priority on the backend and frontend
+- Task forms and cards support due date and assignee fields
+- JWT-based access tokens with refresh-token cookie handling
+- RTK Query data fetching with automatic token refresh retry logic
+- Zod validation for auth and task request payloads
+- Responsive layout with shared app shell, sidebar, and navigation
 
-| Layer | Technologies | Purpose |
-|---|---|---|
-| Client framework | React 18, Vite | SPA rendering and development tooling |
-| Routing | React Router DOM | Public, guest-only, and protected routes |
-| State and server data | Redux Toolkit, RTK Query | API access, caching, invalidation, retry flow |
-| UI styling | Tailwind CSS | Utility-first responsive UI |
-| Client utilities | `use-debounce`, `async-mutex`, `sonner` | Debounced search, request reauth locking, toast notifications |
-| Server framework | Node.js, Express | REST API and middleware pipeline |
-| Database | MongoDB, Mongoose | Data persistence and schema modeling |
-| Auth | JWT, cookies, bcryptjs | Access tokens, refresh tokens, password hashing |
-| Validation | Zod | Request payload validation |
-| Middleware | cors, cookie-parser | CORS and cookie handling |
+## Tech Stack
 
-## 5. Folder Structure
+- Frontend: React 18, Vite, React Router DOM
+- State Management: Redux Toolkit, RTK Query
+- Styling: Tailwind CSS
+- Drag and Drop: @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+- Forms and UI Utilities: react-hook-form, use-debounce, react-hot-toast, sonner, react-icons
+- Backend: Node.js, Express
+- Database: MongoDB, Mongoose
+- Authentication: JWT, bcryptjs, cookies
+- Validation: Zod
+- Middleware: cors, cookie-parser
+
+## Folder Structure
 
 ```text
 TaskFlow/
 ├── client/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── api/
-│   │   │   └── store.js
-│   │   ├── components/
-│   │   │   ├── layout/
-│   │   │   ├── tasks/
-│   │   │   └── ui/
-│   │   ├── features/
-│   │   │   ├── auth/
-│   │   │   └── tasks/
-│   │   ├── pages/
-│   │   ├── routes/
-│   │   └── styles/
-│   ├── .env.example
+│   ├── index.html
 │   ├── package.json
-│   └── vite.config.js
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   ├── vite.config.js
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       ├── app/
+│       │   ├── api/
+│       │   │   └── baseApi.js
+│       │   └── store.js
+│       ├── components/
+│       │   ├── layout/
+│       │   │   ├── AppLayout.jsx
+│       │   │   ├── Navbar.jsx
+│       │   │   └── Sidebar.jsx
+│       │   ├── tasks/
+│       │   │   └── TaskModal.jsx
+│       │   └── ui/
+│       │       ├── Button.jsx
+│       │       ├── Input.jsx
+│       │       ├── Select.jsx
+│       │       └── Textarea.jsx
+│       ├── context/
+│       │   └── AuthContext.jsx
+│       ├── features/
+│       │   ├── auth/
+│       │   │   ├── api/
+│       │   │   │   └── authApi.js
+│       │   │   ├── components/
+│       │   │   │   ├── LoginForm.jsx
+│       │   │   │   └── RegisterForm.jsx
+│       │   │   └── slices/
+│       │   │       └── authSlice.js
+│       │   └── tasks/
+│       │       ├── api/
+│       │       │   └── tasksApi.js
+│       │       ├── components/
+│       │       │   ├── CreateTaskModal.jsx
+│       │       │   ├── DeleteConfirmationDialog.jsx
+│       │       │   ├── EditTaskModal.jsx
+│       │       │   ├── EmptyState.jsx
+│       │       │   ├── LoadingState.jsx
+│       │       │   ├── PriorityBadge.jsx
+│       │       │   ├── StatusBadge.jsx
+│       │       │   ├── TaskActionsMenu.jsx
+│       │       │   ├── TaskCard.jsx
+│       │       │   ├── TaskColumn.jsx
+│       │       │   ├── TaskFilters.jsx
+│       │       │   ├── TaskForm.jsx
+│       │       │   ├── TaskItem.jsx
+│       │       │   └── TaskList.jsx
+│       │       └── utils/
+│       │           └── badgeVariants.js
+│       ├── hooks/
+│       │   ├── useAuth.js
+│       │   └── useTaskDragAndDrop.js
+│       ├── pages/
+│       │   ├── DashboardPage.jsx
+│       │   ├── LoginPage.jsx
+│       │   ├── NotFoundPage.jsx
+│       │   ├── RegisterPage.jsx
+│       │   └── TasksPage.jsx
+│       ├── routes/
+│       │   ├── App.routes.jsx
+│       │   ├── Protected.route.jsx
+│       │   └── guest.route.jsx
+│       └── styles/
+│           └── globals.css
 └── server/
-    ├── src/
-    │   ├── config/
-    │   ├── controllers/
-    │   ├── middleware/
-    │   ├── models/
-    │   ├── routes/
-    │   ├── utils/
-    │   └── validations/
-    ├── .env.example
-    └── package.json
+  ├── app.js
+  ├── package.json
+  ├── server.js
+  └── src/
+    ├── config/
+    │   └── db.config.js
+    ├── controllers/
+    │   ├── auth.controller.js
+    │   └── task.controller.js
+    ├── middleware/
+    │   ├── auth.middleware.js
+    │   ├── error.middleware.js
+    │   └── validate.middleware.js
+    ├── models/
+    │   ├── task.model.js
+    │   └── user.model.js
+    ├── routes/
+    │   ├── auth.routes.js
+    │   └── task.routes.js
+    ├── utils/
+    │   ├── asyncHandler.js
+    │   └── generateToken.js
+    └── validations/
+      ├── auth.validation.js
+      └── task.validation.js
 ```
 
-## 6. Screenshots
-
-No screenshots are committed in the repository yet.
-
-- TODO: Add a dashboard screenshot.
-- TODO: Add a tasks board screenshot.
-- TODO: Add login/register screenshots.
-
-## 7. Installation Guide
+## Installation Guide
 
 ### Prerequisites
+
 - Node.js
 - MongoDB
 
 ### Clone the repository
+
 ```bash
 git clone https://github.com/Md-Masum-Hossain/TaskFlow.git
 cd TaskFlow
 ```
 
 ### Install dependencies
+
 ```bash
 cd server
 npm install
@@ -113,187 +174,140 @@ npm install
 ```
 
 ### Configure environment variables
-Copy the example environment files and update them for your local setup.
+
+Create a `.env` file in both `client/` and `server/` using the templates below.
 
 ### Start the backend
+
 ```bash
 cd server
 npm run dev
 ```
 
 ### Start the frontend
+
 ```bash
 cd client
 npm run dev
 ```
 
-## 8. Environment Variables
+## Environment Variables
 
-| Variable | Scope | Required | Purpose | Example |
-|---|---|---:|---|---|
-| `VITE_API_URL` | Client | Yes | RTK Query base URL | `http://localhost:5000/api` |
-| `PORT` | Server | Yes | Express server port | `5000` |
-| `MONGODB_URI` | Server | Yes | MongoDB connection string | `mongodb://127.0.0.1:27017/taskflow` |
-| `CLIENT_URL` | Server | Yes | Allowed CORS origin | `http://localhost:5173` |
-| `JWT_SECRET` | Server | Yes | Access token signing secret | `change_this_secret` |
-| `REFRESH_TOKEN_SECRET` | Server | Yes | Refresh token signing secret | `change_this_refresh_secret` |
-| `ACCESS_TOKEN_EXPIRES_IN` | Server | No | Access token lifetime | `15m` |
-| `REFRESH_TOKEN_EXPIRES_IN` | Server | No | Refresh token lifetime | `7d` |
-| `NODE_ENV` | Server/runtime | No | Controls cookie security flags | `development` / `production` |
+### client/.env.example
 
-## 9. API Documentation
-
-### Base URL
-```text
-/api
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
 
-### Authentication Endpoints
+### server/.env.example
+
+```env
+PORT=5000
+CLIENT_URL=http://localhost:5173
+MONGODB_URI=mongodb://127.0.0.1:27017/taskflow
+JWT_SECRET=change_this_secret
+REFRESH_TOKEN_SECRET=change_this_refresh_secret
+ACCESS_TOKEN_EXPIRES_IN=15m
+REFRESH_TOKEN_EXPIRES_IN=7d
+NODE_ENV=development
+```
+
+## Available Scripts
+
+### client/package.json
+
+```bash
+npm run dev
+npm run build
+npm run preview
+```
+
+### server/package.json
+
+```bash
+npm run dev
+npm start
+```
+
+## API Endpoints
+
+Base URL: `/api`
+
+### Auth Routes
 
 | Method | Endpoint | Auth | Description |
-|---|---|---:|---|
-| `POST` | `/api/auth/register` | No | Registers a new user, returns `user` and `accessToken`, and sets a refresh-token cookie. |
-| `POST` | `/api/auth/login` | No | Logs in an existing user, returns `user` and `accessToken`, and sets a refresh-token cookie. |
-| `GET` | `/api/auth/me` | Yes | Returns the authenticated user profile. |
-| `POST` | `/api/auth/refresh` | Cookie | Exchanges the refresh-token cookie for a new access token. |
-| `POST` | `/api/auth/logout` | No | Clears the refresh-token cookie. |
+|---|---|---|---|
+| POST | `/api/auth/register` | No | Register a new user and return `user` and `accessToken` while setting the refresh-token cookie. |
+| POST | `/api/auth/login` | No | Log in a user and return `user` and `accessToken` while setting the refresh-token cookie. |
+| GET | `/api/auth/me` | Yes | Return the authenticated user profile. |
+| POST | `/api/auth/refresh` | Cookie | Exchange the refresh-token cookie for a new access token. |
+| POST | `/api/auth/logout` | No | Clear the refresh-token cookie. |
 
-### Task Endpoints
+### Task Routes
 
 | Method | Endpoint | Auth | Description |
-|---|---|---:|---|
-| `GET` | `/api/tasks` | Yes | Returns the authenticated user’s tasks. Supports `search`, `status`, and `priority` query parameters. |
-| `POST` | `/api/tasks` | Yes | Creates a task for the authenticated user. |
-| `PUT` | `/api/tasks/:id` | Yes | Updates an existing task owned by the authenticated user. |
-| `DELETE` | `/api/tasks/:id` | Yes | Deletes an existing task owned by the authenticated user. |
+|---|---|---|---|
+| GET | `/api/tasks` | Yes | Return the authenticated user's tasks. Supports `search`, `status`, and `priority` query parameters. |
+| POST | `/api/tasks` | Yes | Create a new task for the authenticated user. |
+| PUT | `/api/tasks/:id` | Yes | Update an existing task owned by the authenticated user. |
+| DELETE | `/api/tasks/:id` | Yes | Delete an existing task owned by the authenticated user. |
 
 ### Query Parameters
 
 The task list endpoint accepts these filters:
+
 - `search`
 - `status`
 - `priority`
 
 Example:
+
 ```text
 /api/tasks?search=design&status=todo&priority=high
 ```
 
-## 10. Authentication Flow
-1. The user registers or logs in from the client.
-2. The server hashes passwords with `bcryptjs` and issues an access token plus a refresh token.
-3. The refresh token is stored in an `httpOnly` cookie.
-4. The client stores the access token in `localStorage`.
-5. RTK Query attaches the access token as a Bearer token on requests.
-6. When a request returns `401`, the RTK Query base layer calls `/api/auth/refresh`.
-7. If refresh succeeds, the client stores the new access token and retries the original request.
-8. `ProtectedRoute` blocks authenticated pages without a token.
-9. `GuestRoute` redirects authenticated users away from login/register pages.
+## Authentication Flow
 
-## 11. Task Workflow
-1. Open the Tasks page inside the protected shell.
-2. Search tasks by title or description.
-3. Filter tasks by priority or status.
-4. Create a new task with the task modal.
-5. Edit a task from the task card action menu.
-6. Delete a task through the confirmation dialog.
-7. The backend invalidates the `Tasks` tag after create, update, and delete mutations, so the task list refreshes automatically.
-8. Dashboard counts and previews update from the same task dataset.
+1. The user registers or logs in through the client.
+2. The server validates the payload with Zod.
+3. The server hashes the password with `bcryptjs` and generates an access token and a refresh token.
+4. The refresh token is stored in an `httpOnly` cookie.
+5. The client stores the access token in `localStorage`.
+6. RTK Query attaches the access token as a Bearer token on API requests.
+7. If a request returns `401`, the base query calls `/api/auth/refresh`.
+8. If refresh succeeds, the client stores the new access token and retries the original request.
+9. `ProtectedRoute` blocks protected pages when no access token exists.
+10. `GuestRoute` redirects authenticated users away from login and register pages.
 
-## 12. Project Architecture
+## Project Screenshots
 
-### High-level architecture
-- `client/` is a React SPA built with Vite.
-- `server/` is an Express REST API backed by MongoDB.
-- RTK Query is used as the data layer between client and server.
-- JWT access tokens authorize requests.
-- Refresh tokens are stored in cookies and used to recover expired sessions.
-- Zod validates incoming auth and task payloads.
+No screenshots are committed in the repository yet.
 
-```mermaid
-graph TD
-  Browser[Browser] --> Client[React + Vite Client]
-  Client -->|Bearer access token| API[Express API]
-  Client -->|refresh cookie on 401| Refresh[/api/auth/refresh/]
-  API --> Auth[JWT Auth Middleware]
-  API --> Tasks[Task Controllers]
-  API --> Mongo[(MongoDB via Mongoose)]
-  Client --> RTK[RTK Query baseApi]
-  RTK -->|auto reauth + retry| API
-```
+- Dashboard screenshot: not available
+- Tasks board screenshot: not available
+- Login screen screenshot: not available
+- Register screen screenshot: not available
 
-### Client-side architecture
-- `src/routes/` contains guest and protected route wrappers.
-- `src/components/layout/` contains the shared app shell.
-- `src/components/tasks/` contains the reusable task modal.
-- `src/features/auth/` contains auth UI and API hooks.
-- `src/features/tasks/` contains task UI components, filters, and API hooks.
-- `src/pages/` contains Dashboard, Tasks, Login, Register, and NotFound pages.
+## Live Demo
 
-### Server-side architecture
-- `src/routes/` wires the HTTP endpoints.
-- `src/controllers/` contains auth and task handlers.
-- `src/middleware/` contains JWT protection, validation, and error handling.
-- `src/models/` defines MongoDB schemas.
-- `src/validations/` defines Zod schemas.
-- `src/utils/` contains token generation and async helpers.
+No live demo URL is committed in this repository.
 
-## 13. Available Scripts
+## GitHub Repository
 
-### Client
+Md-Masum-Hossain/TaskFlow
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Starts the Vite development server. |
-| `npm run build` | Builds the client for production. |
-| `npm run preview` | Previews the production build locally. |
+## Future Improvements
 
-### Server
+- Add a deployed live demo link
+- Add screenshot assets for the main screens
+- Add task pagination for larger task lists
+- Add task assignment UI if assignee management is expanded
+- Add production deployment documentation
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Starts the Express server with Nodemon. |
-| `npm start` | Starts the server with Node.js. |
+## License
 
-## 14. Future Improvements
+No license file is committed in the repository.
 
-TODO:
-- Add a dedicated issue-management module if the product scope expands beyond task management.
-- Add automated tests for auth, task CRUD, and route protection.
-- Add pagination or infinite loading for large task lists.
-- Add deployment-specific documentation once the hosting target is finalized.
+## Author
 
-## 15. Deployment Instructions
-
-No deployment pipeline or hosting configuration is currently committed.
-
-### Verified production checklist
-1. Set `NODE_ENV=production` on the server.
-2. Configure a production `MONGODB_URI`.
-3. Set strong `JWT_SECRET` and `REFRESH_TOKEN_SECRET` values.
-4. Update `CLIENT_URL` to the deployed frontend origin.
-5. Set `VITE_API_URL` to the deployed API origin if you are not using a same-origin proxy.
-6. Build the client:
-```bash
-cd client
-npm run build
-```
-7. Start the server:
-```bash
-cd server
-npm start
-```
-
-### TODO
-- TODO: Add platform-specific deployment steps.
-- TODO: Add CI/CD instructions if a pipeline is introduced.
-
-## 16. License
-TODO: No license file is currently included in the repository.
-
-## 17. Author
-Md. Masum Hossain
-
-GitHub: https://github.com/Md-Masum-Hossain
-
-Portfolio: https://www.masumsportfolio.me
+Md Masum Hossain
